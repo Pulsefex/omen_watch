@@ -256,8 +256,6 @@ void ssd1306_I2C_WriteMulti(uint8_t address, uint8_t reg, uint8_t *data, uint16_
 void SSD1306_DrawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, SSD1306_COLOR_t color);
 void SSD1306_ON(void);
 void SSD1306_OFF(void);
-void ssd1306_DrawPixel(uint8_t x, uint8_t y, SSD1306_COLOR_t color);
-void ssd1306_DrawBitmap(uint8_t x, uint8_t y, const unsigned char* bitmap, uint8_t w, uint8_t h, SSD1306_COLOR_t color);
 /* C++ detection */
 #ifdef __cplusplus
 }

@@ -524,49 +524,4 @@ void ssd1306_I2C_Write(uint8_t address, uint8_t reg, uint8_t data) {
   dt[1] = data;
   HAL_I2C_Master_Transmit(&hi2c3, address, dt, 2, 100);
 }
-
-/* Draw a bitmap */
-void ssd1306_DrawBitmap(uint8_t x, uint8_t y, const unsigned char* bitmap, uint8_t w, uint8_t h, SSD1306_COLOR_t color) {
-    int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
-    uint8_t byte = 0;
-
-    if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) {
-        return;
-    }
-
-    for (uint8_t j = 0; j < h; j++, y++) {
-        for (uint8_t i = 0; i < w; i++) {
-            if (i & 7) {
-                byte <<= 1;
-            } else {
-                byte = (*(const unsigned char *)(&bitmap[j * byteWidth + i / 8]));
-            }
-
-            if (byte & 0x80) {
-                ssd1306_DrawPixel(x + i, y, color);
-            }
-        }
-    }
-    return;
-}
-
-/*
- * Draw one pixel in the screenbuffer
- * X => X Coordinate
- * Y => Y Coordinate
- * color => Pixel color
- */
-void ssd1306_DrawPixel(uint8_t x, uint8_t y, SSD1306_COLOR_t color) {
-    if(x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) {
-        // Don't write outside the buffer
-        return;
-    }
-
-    // Draw in the right color
-    if(color == SSD1306_COLOR_WHITE) {
-        SSD1306_Buffer[x + (y / 8) * SSD1306_WIDTH] |= 1 << (y % 8);
-    } else {
-        SSD1306_Buffer[x + (y / 8) * SSD1306_WIDTH] &= ~(1 << (y % 8));
-    }
-}
 /* USER CODE END */

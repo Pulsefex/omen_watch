@@ -41,6 +41,8 @@
 /* USER CODE BEGIN Includes */
 #include "scheduler.h"
 #include "logo.h"
+#include "ssd1306.h"
+#include "ssd1306_fonts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,6 +52,8 @@
 #include "kalman.h"
 #include "max30102.h"
 #include "max30003.h"
+#include "sim800l.h"
+#include "tmp102.h"
 #include "oled.h"
 #include <stdio.h>
 #include <string.h>
@@ -68,7 +72,7 @@ char a[22]="AT+CMGS=\"+84929629746\"";
 uint16_t RxCounter;
 #if defined SMS
 char rx_buf[SIM_BUFFER];
-char publish_mes[MAX_PUBLISH_MES][LEN_PUBLISH_MES]={"WE DETECTED YOUR HEART RATE AND SPO2 LEVELS TO BE ABNORMAL, PLEASE SEAK PROFESSIONAL HELP",
+char publish_mes[MAX_PUBLISH_MES][LEN_PUBLISH_MES]={"WE DETECTED YOUR HEART RATE AND SPO2 LEVELS TO BE ABNORMAL, PLEASE SEEK PROFESSIONAL HELP",
                                                     "DAU DO KHONG CO NUOC, KIEM TRA KET NOI DAU DO, QUE DO PHAI NGAP SAU TRONG NUOC ",
                                                     "DANG KY THANH CONG, HE THONG SE THONG BAO CHO QUY KHACH VE CHAT LUONG NUOC LOC "};
 char topic[LEN_TOPIC]="858173002686";
@@ -298,6 +302,18 @@ void vPrintSensorData(uint32_t data){
 	memset(text,0,20);
 }
 
+void vPrintTMP102Data(float temp,int status) {
+    unsigned char text[50];
+    if (status==TMP102_ERR_OK) {
+        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
+    } else {
+        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
+    }
+    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
+    memset(text,0,sizeof(text));
+}
+
+
 void vShowOledScreenProcess(uint8_t status) {
 	if (status == OLED_STATUS_DEF) {
 		ucPrintCounter = 0;
@@ -439,8 +455,12 @@ void setActiveSensor(uint8_t data) {
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_Delay(250);
 	systemInit();
-	ssd1306_DrawBitmap(0,0,logo,128,64,1);
-	SSD1306_UpdateScreen();
+	ssd1306_Init();
+	  ssd1306_DrawBitmap(0,0,logo,128,64,1);
+	  ssd1306_UpdateScreen();
+	  HAL_Delay(2000); // Display for 2 seconds
+	  ssd1306_Fill(Black);
+	  ssd1306_UpdateScreen();
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
 	/* USER CODE END 2 */
 	APPE_Init();
@@ -452,15 +472,18 @@ void setActiveSensor(uint8_t data) {
 		SCH_Run(~0);
 		vReadSensorData();
 		vShowOledScreenProcess(OLED_STATUS_MAX30102);
-
+		float temp=0.0;
+		int result;
+		result = TMP102_ReadTemperature(&temp);
         //fetch heart rate and SpO2
         unsigned char heartRate=ucGetMax30102HR();
         unsigned char spo2= ucGetMax30102SPO2();
-
+        vPrintTMP102Data(temp, result);
         //print to my serial
         //i run the command screen /dev/ttyACM0 115200 on Ubuntu Linux
         vPrintSensorData((uint32_t)heartRate);
         vPrintSensorData((uint32_t)spo2);
+
 
         HAL_Delay(1000); // Wait for 1 second before next read
 
