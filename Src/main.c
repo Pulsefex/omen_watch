@@ -475,9 +475,9 @@ void setActiveSensor(uint8_t data) {
 	  ssd1306_Fill(Black);
 	  ssd1306_UpdateScreen();
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
-    if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
-    else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
-	HAL_Delay(2000);
+//    if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
+//    else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
+//	HAL_Delay(2000);
 	/* USER CODE END 2 */
 	APPE_Init();
 	/* Infinite loop */
