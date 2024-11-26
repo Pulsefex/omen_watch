@@ -57,6 +57,7 @@
 #include "oled.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -303,6 +304,17 @@ void vPrintSensorData(uint32_t data){
 }
 
 
+void vPrintSIM800l(const char* format,...){
+    unsigned char text[128];
+    va_list args;
+    va_start(args,format);
+    vsnprintf((char*)text,sizeof(text),format,args);
+    va_end(args);
+    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
+    memset(text,0,sizeof(text));
+}
+
+
 void vPrintTMP102Data(float temp,int status) {
     unsigned char text[50];
     if (status==TMP102_ERR_OK) {
@@ -463,6 +475,9 @@ void setActiveSensor(uint8_t data) {
 	  ssd1306_Fill(Black);
 	  ssd1306_UpdateScreen();
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
+    if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
+    else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
+	HAL_Delay(2000);
 	/* USER CODE END 2 */
 	APPE_Init();
 	/* Infinite loop */
@@ -484,7 +499,7 @@ void setActiveSensor(uint8_t data) {
         //i run the command screen /dev/ttyACM0 115200 on Ubuntu Linux
         vPrintSensorData((uint32_t)heartRate);
         vPrintSensorData((uint32_t)spo2);
-
+        HAL_Delay(5000);
 
 #if defined SMS
         sim_signal = sim_signal_strength(rx_buf);
