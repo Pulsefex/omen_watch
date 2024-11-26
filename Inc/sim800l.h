@@ -6,6 +6,7 @@
 /* uC-SIM buffer */
 #define MIN_BUFFER 255
 #define MAX_SMS 35
+#include <stdbool.h>
 
 // /* SIM command index */
 // #define IDX_CMD_TEXT_MODE       1
@@ -48,6 +49,7 @@
 
 
 /* supportted function */
+bool sim800l_initialize(void);
 uint8_t sim_read_sms(uint8_t, uint8_t, char*);
 uint8_t sim_dele_sms(uint8_t, char*);
 uint8_t sim_send_sms(char*, char*, char*);

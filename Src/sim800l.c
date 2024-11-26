@@ -17,6 +17,35 @@ char sim_cmd_res_err[LEN_CMD_RES_ERR]="\r\nERROR\r\n";//respond from module SIM,
 
 
 /*-----------------------------------------------------------------
+ * initialize the sim800l module
+ */
+bool sim800l_initialize(void){
+    char response[MIN_BUFFER];
+    memset(response,0,sizeof(response));
+    push_cmd("AT\r",3);
+    HAL_Delay(500);
+    if(sim_check_res(response)!=SIM_RES_OK) {
+        return false;
+    }
+    push_cmd("AT+CPIN?\r",10);
+    HAL_Delay(500);
+    if(sim_check_res(response)!=SIM_RES_OK) {
+        return false;
+    }
+    push_cmd("AT+CREG?\r",10);
+    HAL_Delay(500);
+    if(sim_check_res(response)!=SIM_RES_OK) {
+        return false;
+    }
+    push_cmd("AT+CSQ\r",8);
+    HAL_Delay(500);
+    if(sim_check_res(response)!=SIM_RES_OK) {
+        return false;
+    }
+    return true;
+}
+
+/*-----------------------------------------------------------------
  * return sms state (read/unread)
  */
 uint8_t sim_get_sms_state(char* buf)

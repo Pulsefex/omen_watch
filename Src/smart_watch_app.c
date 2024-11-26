@@ -556,7 +556,7 @@ static void SMART_WATCH_DATA_Timer_Callback(void){
 	for(i=0;i<4;i++)
 		value[OFFSET_DATA_TEMP+3-i] = tmpVal.uc[i];
 	//get gsr data
-	tmpVal.ui = uiGetGSRHumanResistance()%0xFFFF;
+	//tmpVal.ui = uiGetGSRHumanResistance()%0xFFFF;
 	//tmpVal.ui =(unsigned int)dCalculateKalmanDataSet((double)tmpVal.ui);
 	for(i=0;i<2;i++)
 		value[OFFSET_DATA_GSR+1-i] = tmpVal.uc[i];

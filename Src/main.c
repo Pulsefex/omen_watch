@@ -57,6 +57,7 @@
 #include "oled.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -121,10 +122,10 @@ static void MX_TIM16_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM17_Init(void);
 /* USER CODE BEGIN PFP */
-uint32_t uiGSRRawData=0;
-volatile static unsigned int uiAd8232AnalogConvertedValue = 0;
-volatile static unsigned char ucAd8232AnalogConvertedValue = 0;
-volatile static unsigned short usAd8232AnalogConvertedValue = 0;
+//uint32_t uiGSRRawData=0;
+//volatile static unsigned int uiAd8232AnalogConvertedValue = 0;
+//volatile static unsigned char ucAd8232AnalogConvertedValue = 0;
+//volatile static unsigned short usAd8232AnalogConvertedValue = 0;
 
 volatile uint32_t uiTimer16Counter = 0;
 volatile uint8_t ucSensorReadFlag = 0;
@@ -136,9 +137,9 @@ uint8_t ucIsMax30003Active = 1;
 uint8_t ucIsSi7021Active = 1;
 uint8_t ucIsSRActive = 1;
 
-unsigned int ADC_TIMEOUT = 300;
-unsigned char ucIsResponseFinished = 1;
-unsigned int uiAd8232MaxValue = 4000;
+//unsigned int ADC_TIMEOUT = 300;
+//unsigned char ucIsResponseFinished = 1;
+//unsigned int uiAd8232MaxValue = 4000;
 
 #define fCons  0xff/uiAd8232MaxValue
 
@@ -169,32 +170,32 @@ volatile uint16_t usADCxConvertedData_Voltage_mVolt = 0; /* Value of voltage cal
 /*  2: ADC group regular unitary conversion has not been started yet          */
 /*     (initial state)                                                        */
 
-int groveGsrCounter = 0 ;
-long groveVal;
-void prsCheckAI() {
-	/* Init variable containing ADC conversion data */
-	uhADCxConvertedData = VAR_CONVERTED_DATA_INIT_VALUE;
-	if (!ucIsResponseFinished)
-		return;
-	ucIsResponseFinished = 0;
-  
-	HAL_ADC_Start_IT(&hadc1);
-	/*
-	if (HAL_ADC_Start_IT(&AdcHandle) != HAL_OK) {
-	}
-	*/
-}
+//int groveGsrCounter = 0 ;
+//long groveVal;
+//void prsCheckAI() {
+//	/* Init variable containing ADC conversion data */
+//	uhADCxConvertedData = VAR_CONVERTED_DATA_INIT_VALUE;
+//	if (!ucIsResponseFinished)
+//		return;
+//	ucIsResponseFinished = 0;
+//
+//	HAL_ADC_Start_IT(&hadc1);
+//	/*
+//	if (HAL_ADC_Start_IT(&AdcHandle) != HAL_OK) {
+//	}
+//	*/
+//}
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-	uhADCxConvertedData = HAL_ADC_GetValue(hadc);
-	/* Computation of ADC conversions raw data to physical values           */
-	/* using helper macro.                                                  */
-	usADCxConvertedData_Voltage_mVolt = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
-			uhADCxConvertedData);
-	vSetGSRAnalogValue(uhADCxConvertedData);
-	//HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
-	ucIsResponseFinished = 1;
-}
+//void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
+//	uhADCxConvertedData = HAL_ADC_GetValue(hadc);
+//	/* Computation of ADC conversions raw data to physical values           */
+//	/* using helper macro.                                                  */
+//	usADCxConvertedData_Voltage_mVolt = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
+//			uhADCxConvertedData);
+//	vSetGSRAnalogValue(uhADCxConvertedData);
+//	//HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
+//	ucIsResponseFinished = 1;
+//}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM16) {
@@ -220,10 +221,10 @@ void initTimer() {
 	HAL_TIM_Base_Init(&htim16);
 }
 
-void initAdc() {
-	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK) {
-	}
-}
+//void initAdc() {
+//	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK) {
+//	}
+//}
 
 void initInterrupts() {
 	HAL_TIM_Base_Start_IT(&htim16);
@@ -245,39 +246,39 @@ void systemInit(void) {
 
 }
 
-void vSetGSRAnalogValue(uint32_t value){
-	uiGSRRawData=value;
-}
-
-uint32_t uiGetGSRHumanResistance(void){
-	return uiGSRRawData;//((1024+2*uiGSRRawData)*10000)/(512-uiGSRRawData);
-}
-
-unsigned char ucGetAd8232AnalogValue() {
-	return ucAd8232AnalogConvertedValue;
-}
-
-unsigned int uiGetAd8232AnalogValue() {
-	return uiAd8232AnalogConvertedValue;
-}
-
-unsigned short usGetAd8232AnalogValue() {
-	return usAd8232AnalogConvertedValue;
-}
-
-void vSetAdcChannel(uint32_t adcChannel){
-	ADC_ChannelConfTypeDef sConfig = { 0 };
-
-	sConfig.Channel = adcChannel;
-	sConfig.Rank = ADC_REGULAR_RANK_1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
-	sConfig.SingleDiff = ADC_SINGLE_ENDED;
-	sConfig.OffsetNumber = ADC_OFFSET_NONE;
-	sConfig.Offset = 0;
-	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
-		//Error_Handler();
-	}
-}
+//void vSetGSRAnalogValue(uint32_t value){
+//	uiGSRRawData=value;
+//}
+//
+//uint32_t uiGetGSRHumanResistance(void){
+//	return uiGSRRawData;//((1024+2*uiGSRRawData)*10000)/(512-uiGSRRawData);
+//}
+//
+//unsigned char ucGetAd8232AnalogValue() {
+//	return ucAd8232AnalogConvertedValue;
+//}
+//
+//unsigned int uiGetAd8232AnalogValue() {
+//	return uiAd8232AnalogConvertedValue;
+//}
+//
+//unsigned short usGetAd8232AnalogValue() {
+//	return usAd8232AnalogConvertedValue;
+//}
+//
+//void vSetAdcChannel(uint32_t adcChannel){
+//	ADC_ChannelConfTypeDef sConfig = { 0 };
+//
+//	sConfig.Channel = adcChannel;
+//	sConfig.Rank = ADC_REGULAR_RANK_1;
+//	sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+//	sConfig.SingleDiff = ADC_SINGLE_ENDED;
+//	sConfig.OffsetNumber = ADC_OFFSET_NONE;
+//	sConfig.Offset = 0;
+//	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+//		//Error_Handler();
+//	}
+//}
 
 void vReadSensorData(void){
 	if(ucSensorReadFlag == 1){
@@ -288,7 +289,7 @@ void vReadSensorData(void){
 		if(ucIsMax30102Active)
 			vMax30102ReadData();
 		ucSensorReadFlag=0;
-		HAL_ADC_Start_DMA(&hadc1,&uiGSRRawData,1);
+		//HAL_ADC_Start_DMA(&hadc1,&uiGSRRawData,1);
 		vShowOledScreenProcess(ucOledStatusFlag);
 	}
 
@@ -302,16 +303,28 @@ void vPrintSensorData(uint32_t data){
 	memset(text,0,20);
 }
 
-void vPrintTMP102Data(float temp,int status) {
-    unsigned char text[50];
-    if (status==TMP102_ERR_OK) {
-        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
-    } else {
-        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
-    }
+
+void vPrintSIM800l(const char* format,...){
+    unsigned char text[128];
+    va_list args;
+    va_start(args,format);
+    vsnprintf((char*)text,sizeof(text),format,args);
+    va_end(args);
     HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
     memset(text,0,sizeof(text));
 }
+
+
+//void vPrintTMP102Data(float temp,int status) {
+//    unsigned char text[50];
+//    if (status==TMP102_ERR_OK) {
+//        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
+//    } else {
+//        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
+//    }
+//    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
+//    memset(text,0,sizeof(text));
+//}
 
 
 void vShowOledScreenProcess(uint8_t status) {
@@ -320,12 +333,12 @@ void vShowOledScreenProcess(uint8_t status) {
 	}else if (status == OLED_STATUS_SHUT_DOWN){
 		ucPrintCounter = 0;
 		vOledBleClearScreen();
-	}
-	else if (status == OLED_STATUS_GSR) {
-		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT_GSR) {
-			vOledBlePrintGSR((float) uiGetGSRHumanResistance());
-			ucPrintCounter = 0;
-		}
+//	}
+//	else if (status == OLED_STATUS_GSR) {
+//		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT_GSR) {
+//			vOledBlePrintGSR((float) uiGetGSRHumanResistance());
+//			ucPrintCounter = 0;
+//		}
 	} else if (status == OLED_STATUS_MAX30003) {
 		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT_MAX30003) {
 			int j = 0;
@@ -458,10 +471,10 @@ void setActiveSensor(uint8_t data) {
 	ssd1306_Init();
 	  ssd1306_DrawBitmap(0,0,logo,128,64,1);
 	  ssd1306_UpdateScreen();
-	  HAL_Delay(2000); // Display for 2 seconds
-	  ssd1306_Fill(Black);
-	  ssd1306_UpdateScreen();
+	  HAL_Delay(2000); // Display pulsefex logo for 2 seconds
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
+//    if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
+//    else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
 	/* USER CODE END 2 */
 	APPE_Init();
 	/* Infinite loop */
@@ -472,20 +485,17 @@ void setActiveSensor(uint8_t data) {
 		SCH_Run(~0);
 		vReadSensorData();
 		vShowOledScreenProcess(OLED_STATUS_MAX30102);
-		float temp=0.0;
-		int result;
-		result = TMP102_ReadTemperature(&temp);
+//		float temp=0.0;
+//		int result;
+//		result = TMP102_ReadTemperature(&temp);
         //fetch heart rate and SpO2
         unsigned char heartRate=ucGetMax30102HR();
         unsigned char spo2= ucGetMax30102SPO2();
-        vPrintTMP102Data(temp, result);
+//        vPrintTMP102Data(temp, result);
         //print to my serial
         //i run the command screen /dev/ttyACM0 115200 on Ubuntu Linux
         vPrintSensorData((uint32_t)heartRate);
         vPrintSensorData((uint32_t)spo2);
-
-
-        HAL_Delay(1000); // Wait for 1 second before next read
 
 #if defined SMS
         sim_signal = sim_signal_strength(rx_buf);
