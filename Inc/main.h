@@ -68,7 +68,7 @@ extern "C" {
 
 #define MAX_CLIENT      10
 #define LEN_TOPIC       12
-#define SIM_BUFFER MIN_BUFFER
+//#define SIM_BUFFER MIN_BUFFER
 
 #define MAX_PUBLISH_MES 3
 #define PUBLISH_WATER_UNSAFE 0

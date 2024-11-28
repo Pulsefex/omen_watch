@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "app_common.h"
 #include "hw_conf.h"
+#include "sim800l.h"
 #if (CFG_HW_LPUART1_ENABLED == 1)
 extern UART_HandleTypeDef hlpuart1;
 #endif
@@ -257,34 +258,24 @@ void HW_UART_DMA_Interrupt_Handler(hw_uart_id_t hw_uart_id)
         return;
     }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    switch ((uint32_t)huart->Instance)
-    {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == USART1) {
 #if (CFG_HW_USART1_ENABLED == 1)
-        case (uint32_t)USART1:
-                if(HW_huart1RxCb)
-                {
-                    HW_huart1RxCb();
-                }
-        break;
+        if (HW_huart1RxCb) {
+            HW_huart1RxCb();
+        }
 #endif
-
+    } else if (huart->Instance == LPUART1) {
 #if (CFG_HW_LPUART1_ENABLED == 1)
-        case (uint32_t)LPUART1:
-                if(HW_hlpuart1RxCb)
-                {
-                    HW_hlpuart1RxCb();
-                }
-        break;
+        if (HW_hlpuart1RxCb) {
+            HW_hlpuart1RxCb();
+        }
 #endif
-
-        default:
-            break;
+    } else if (huart->Instance == ((UART_HandleTypeDef *)UART_SIM800)->Instance) {
+        Sim800_RxCallBack();
     }
-
-    return;
 }
+
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
