@@ -36,7 +36,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 extern uint16_t RxCounter;
-extern char rx_buf[SIM_BUFFER];
+///extern char rx_buf[SIM_BUFFER];
 #if defined DEBUG
 extern uint16_t DbgCounter;
 extern char rx_dbg[DBG_BUF];

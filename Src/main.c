@@ -58,6 +58,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -315,16 +316,16 @@ void vPrintSIM800l(const char* format,...){
 }
 
 
-//void vPrintTMP102Data(float temp,int status) {
-//    unsigned char text[50];
-//    if (status==TMP102_ERR_OK) {
-//        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
-//    } else {
-//        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
-//    }
-//    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
-//    memset(text,0,sizeof(text));
-//}
+void vPrintTMP102Data(float temp,int status) {
+    unsigned char text[50];
+    if (status==TMP102_ERR_OK) {
+        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
+    } else {
+        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
+    }
+    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
+    memset(text,0,sizeof(text));
+}
 
 
 void vShowOledScreenProcess(uint8_t status) {
@@ -473,8 +474,23 @@ void setActiveSensor(uint8_t data) {
 	  ssd1306_UpdateScreen();
 	  HAL_Delay(2000); // Display pulsefex logo for 2 seconds
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
-//    if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
-//    else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
+    //if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
+    //else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
+//	Uart_Init(USART1, 9600);
+//	static bool sim900_initialized = false;
+//
+//	Initialize_SIM900();
+//	if (sim900_initialized) {
+//	    vPrintSIM800l("SIM800L initialized successfully.\r\n");
+//	} else {
+//	    vPrintSIM800l("SIM800L initialization failed.\r\n");
+//	}
+//
+//	    do
+//	       {
+//	       SIM900_print("ATD14168259909;\r\n");
+//	       }while (SIM900_waitResponse() != SIM900_OK); //wait until ... "OK"
+
 	/* USER CODE END 2 */
 	APPE_Init();
 	/* Infinite loop */
@@ -485,17 +501,17 @@ void setActiveSensor(uint8_t data) {
 		SCH_Run(~0);
 		vReadSensorData();
 		vShowOledScreenProcess(OLED_STATUS_MAX30102);
-//		float temp=0.0;
-//		int result;
-//		result = TMP102_ReadTemperature(&temp);
+		float temp=0.0;
+		int result;
+		result = TMP102_ReadTemperature(&temp);
         //fetch heart rate and SpO2
         unsigned char heartRate=ucGetMax30102HR();
         unsigned char spo2= ucGetMax30102SPO2();
-//        vPrintTMP102Data(temp, result);
+        vPrintTMP102Data(temp, result);
         //print to my serial
         //i run the command screen /dev/ttyACM0 115200 on Ubuntu Linux
-        vPrintSensorData((uint32_t)heartRate);
-        vPrintSensorData((uint32_t)spo2);
+//        vPrintSensorData((uint32_t)heartRate);
+//        vPrintSensorData((uint32_t)spo2);
 
 #if defined SMS
         sim_signal = sim_signal_strength(rx_buf);
