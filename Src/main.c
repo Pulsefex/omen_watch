@@ -58,28 +58,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#if defined TEST_SIM
-#define DBG_BUF     255
-char rx_dbg[DBG_BUF];
-uint8_t cmd_available,res_available,cmd_len,res_len;
-char a[22]="AT+CMGS=\"+84929629746\"";
-#endif
 
 
 uint16_t RxCounter;
-#if defined SMS
-char rx_buf[SIM_BUFFER];
-char publish_mes[MAX_PUBLISH_MES][LEN_PUBLISH_MES]={"WE DETECTED YOUR HEART RATE AND SPO2 LEVELS TO BE ABNORMAL, PLEASE SEEK PROFESSIONAL HELP",
-                                                    "DAU DO KHONG CO NUOC, KIEM TRA KET NOI DAU DO, QUE DO PHAI NGAP SAU TRONG NUOC ",
-                                                    "DANG KY THANH CONG, HE THONG SE THONG BAO CHO QUY KHACH VE CHAT LUONG NUOC LOC "};
-char topic[LEN_TOPIC]="858173002686";
-struct PHONEBOOK contact[MAX_CLIENT];
-uint8_t sim_signal;
-#endif
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -280,6 +266,8 @@ void systemInit(void) {
 //	}
 //}
 
+
+
 void vReadSensorData(void){
 	if(ucSensorReadFlag == 1){
 		//if(ucIsSi7021Active)
@@ -315,16 +303,16 @@ void vPrintSIM800l(const char* format,...){
 }
 
 
-//void vPrintTMP102Data(float temp,int status) {
-//    unsigned char text[50];
-//    if (status==TMP102_ERR_OK) {
-//        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
-//    } else {
-//        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
-//    }
-//    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
-//    memset(text,0,sizeof(text));
-//}
+void vPrintTMP102Data(float temp,int status) {
+    unsigned char text[50];
+    if (status==TMP102_ERR_OK) {
+        sprintf((char*)text,"Temperature: %.2f°C\r\n",temp);
+    } else {
+        sprintf((char*)text,"TMP102 Read Error: %d\r\n",status);
+    }
+    HAL_UART_Transmit(&huart1,text,strlen((char*)text),300);
+    memset(text,0,sizeof(text));
+}
 
 
 void vShowOledScreenProcess(uint8_t status) {
@@ -446,24 +434,6 @@ void setActiveSensor(uint8_t data) {
 	MX_TIM17_Init();
 	/* USER CODE BEGIN 2 */
 
-#if defined SMS
-    //interact with sim via text mode
-    while( (sim_set_text_mode(1,rx_buf) & SIM_RES_OK) == 0 );
-
-    //do not generate interrupt when new sms comes
-    while( (sim_set_cnmi_mode(0,0,0,0,0,rx_buf) & SIM_RES_OK) == 0 );
-
-    //disable phonecall
-    while( (sim_rej_in_call(1,rx_buf) & SIM_RES_OK) == 0 );
-
-    //free phonebook
-    for(i=0;i<MAX_CLIENT;i++)
-    {
-        memset(contact[i].number,'x',LEN_PHONE_NUM);
-        contact[i].stat   = 0;
-    }
-#endif
-
 	HAL_GPIO_WritePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_Delay(250);
@@ -472,9 +442,43 @@ void setActiveSensor(uint8_t data) {
 	  ssd1306_DrawBitmap(0,0,logo,128,64,1);
 	  ssd1306_UpdateScreen();
 	  HAL_Delay(2000); // Display pulsefex logo for 2 seconds
+	  ssd1306_Init();
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
-//    if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
-//    else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
+    //if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
+    //else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
+//	Uart_Init(USART1, 9600);
+//	static bool sim900_initialized = false;
+//
+//	Initialize_SIM900();
+//	if (sim900_initialized) {
+//	    vPrintSIM800l("SIM800L initialized successfully.\r\n");
+//	} else {
+//	    vPrintSIM800l("SIM800L initialization failed.\r\n");
+//	}
+//
+//	    do
+//	       {
+//	       SIM900_print("ATD14168259909;\r\n");
+//	       }while (SIM900_waitResponse() != SIM900_OK); //wait until ... "OK"
+
+    // MQTT settings
+//    SIM800.sim.apn = "internet";
+//    SIM800.sim.apn_user = "";
+//    SIM800.sim.apn_pass = "";
+//    SIM800.mqttServer.host = "mqtt.mqtt.ru";
+//    SIM800.mqttServer.port = 1883;
+//    SIM800.mqttClient.username = "user";
+//    SIM800.mqttClient.pass = "pass";
+//    SIM800.mqttClient.clientID = "TestSub";
+//    SIM800.mqttClient.keepAliveInterval = 120;
+//
+//    MQTT_Init();
+//
+//       uint8_t sub = 0;
+//
+//       // Phone number for publishing
+//       char phone_number[] = "+11234567890";
+
 	/* USER CODE END 2 */
 	APPE_Init();
 	/* Infinite loop */
@@ -484,54 +488,49 @@ void setActiveSensor(uint8_t data) {
 		/* USER CODE BEGIN 3 */
 		SCH_Run(~0);
 		vReadSensorData();
-		vShowOledScreenProcess(OLED_STATUS_MAX30102);
-//		float temp=0.0;
-//		int result;
+		//vShowOledScreenProcess(OLED_STATUS_MAX30102);
+		//float temp=0.0;
+		//int result;
 //		result = TMP102_ReadTemperature(&temp);
         //fetch heart rate and SpO2
-        unsigned char heartRate=ucGetMax30102HR();
-        unsigned char spo2= ucGetMax30102SPO2();
-//        vPrintTMP102Data(temp, result);
+       // unsigned char heartRate=ucGetMax30102HR();
+       //unsigned char spo2= ucGetMax30102SPO2();
+       // vPrintTMP102Data(temp, result);
         //print to my serial
         //i run the command screen /dev/ttyACM0 115200 on Ubuntu Linux
-        vPrintSensorData((uint32_t)heartRate);
-        vPrintSensorData((uint32_t)spo2);
+//        vPrintSensorData((uint32_t)heartRate);
+//        vPrintSensorData((uint32_t)spo2);
 
-#if defined SMS
-        sim_signal = sim_signal_strength(rx_buf);
-        if( (2 < sim_signal) && (30 > sim_signal) )
-        {
-            //sim signal is strong enough
-            GPIO_WriteBit(SIM_STATUS_PORT, SIM_STATUS_Pin, (BitAction)(1));
-        }
-        else
-        {
-            //sim signal is too low or no signal at all
-            GPIO_WriteBit(SIM_STATUS_PORT, SIM_STATUS_Pin, (BitAction)(0));
-        }
-
-        Delay(100);
-        update_phonebook();
-        Delay(100);
-#endif
-
-#if defined SMS
-        if(tds_over_range == TDS_MEASURE_REPEAT)
-        {
-            //tds is over safe range
-            inform_customer(TDS_LIMIT);
-        }
-        else if (tds_under_range == TDS_MEASURE_REPEAT)
-        {
-            //no water at tds probe
-            inform_customer(0);
-        }
-        else if (tds_in_range == TDS_MEASURE_REPEAT)
-        {
-            inform_customer(50);    // choose any value between 0 and TDS_LIMIT
-        }
-#endif
-
+//        if (SIM800.mqttServer.connect == 0) {
+//                MQTT_Init();
+//                sub = 0;
+//            }
+//            if (SIM800.mqttServer.connect == 1) {
+//                if (sub == 0) {
+//                    MQTT_Sub("phone/numbers");  // Subscribe to the phone number topic
+//                    MQTT_Sub("test");          // Subscribe to the test topic
+//                    sub = 1;
+//                }
+//
+//                // Publish test data
+//                MQTT_Pub("phone/numbers", phone_number);  // Publish the phone number
+//                MQTT_Pub("STM32/string", "string");
+//
+//                // Handle incoming messages
+//                if (SIM800.mqttReceive.newEvent) {
+//                    char *topic = SIM800.mqttReceive.topic;
+//                    char *payload = SIM800.mqttReceive.payload;
+//
+//                    if (strcmp(topic, "phone/numbers") == 0) {
+//                        // Process the received phone number
+//                        printf("Received phone number: %s\n", payload);
+//                    }
+//
+//                    SIM800.mqttReceive.newEvent = 0;
+//                }
+//            }
+//            HAL_Delay(1000);
+//	}
 	}
 	/* USER CODE END 3 */
 }
@@ -1126,110 +1125,6 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
-#if defined SMS
-/*-----------------------------------------------------------------*/
-/*
- * this function send out warning message to customer if the probe
- * is not plugged into water or the TDS value is bigger the limittation
- */
-void inform_customer(uint16_t tds)
-{
-    uint8_t i;
-    for( i=0; i<MAX_CLIENT; i++ )
-    {
-        //subscribed contact
-        if( (contact[i].stat & SUBSCONFIRMEDF) != 0 )
-        {
-            //water unsafe not sent yet
-            if(tds == TDS_LIMIT)
-            {
-                if((contact[i].stat & UNSAFEF) == 0)
-                {
-                    if( (sim_send_sms(contact[i].number,publish_mes[PUBLISH_WATER_UNSAFE],rx_buf) & SIM_RES_OK) !=0 )
-                        contact[i].stat |= UNSAFEF;
-                }
-            }
-            //tds probe is not digged into water
-            else if(tds == 0)
-            {
-                if((contact[i].stat & UNDIGF) == 0)
-                {
-                    if( (sim_send_sms(contact[i].number,publish_mes[PUBLISH_TDS_PROBE_NOWATER],rx_buf) & SIM_RES_OK) !=0 )
-                    contact[i].stat |= UNDIGF;
-                }
-            }
-            //water safe
-            else
-            {
-                contact[i].stat &= ~UNSAFEF;
-                contact[i].stat &= ~UNDIGF;
-            }
-        }
-    }
-}
-#endif
-
-#if defined SMS
-/**
-  * @this function loop through all sms in memory.
-  * @>  If message contain valid activating code:
-  * @     - If this is the first time reading (message status is "REC UNREAD"), consider this is
-  * @       the activating message sent from user
-  * @     - Updated to phonebook
-  * @       + If this contact is already in the phonebook -> ignore
-  * @       + If this is a new contact, put into the end of phonebook
-  * @       + respond ok if this message status is "REC UNREAD"
-  * @>  Else if message does not contain activate code -> remove this message
-  */
-void update_phonebook(void){
-    uint8_t i,j;
-    uint32_t stat;
-    char temp_contact[LEN_PHONE_NUM]="+xxxxxxxxxxx";//no phonenumber, not sent message yet, not in phonebook
-    char temp_data[MIN_BUFFER];
-    //go through all sms(read/unread) in sim
-    for(i=1;i<=MAX_SMS;i++)
-    {
-        stat=sim_read_sms(i,1,rx_buf); // not change status of sms record (if it is REC UNREAD, it is still REC UNREAD)
-        //check if message contain activate code
-        if( ((stat & SIM_RES_OK)  != 0 ) && ((sim_get_sms_data(temp_data,rx_buf) & SIM_RES_OK) != 0 ) )
-        {
-            // strcpy(inpsut_topic,temp_data,LEN_TOPIC);
-            if( !strcmp(topic,temp_data,LEN_TOPIC) )
-            {
-                sim_get_sms_contact(temp_contact,rx_buf);
-
-                for(j=0; j<MAX_CLIENT; j++)
-                {
-                    //if this contact already exist, just ignore it
-                    if( !strcmp(temp_contact,contact[j].number,LEN_PHONE_NUM) )
-                        break;
-
-                    //this is new contact, push it to the end of phonebook
-                    if( (contact[j].stat & SUBSCONFIRMEDF) == 0 ){
-                        contact[j].stat |= SUBSCONFIRMEDF;
-                        strcpy(contact[j].number,temp_contact,LEN_PHONE_NUM);
-                        break;
-                    }
-
-                }
-
-                //if this is "REC UNREAD"
-                if( (j< MAX_CLIENT) && (sim_get_sms_state(rx_buf) == SMS_UNREAD) )
-                {
-                    if( (sim_send_sms(contact[j].number,publish_mes[PUBLISH_SUBSCRIBED_OK],rx_buf) & SIM_RES_OK) !=0 )
-                        contact[j].stat |= SUBSCONFIRMEDF;
-                    stat=sim_read_sms(i,0,rx_buf); // re-read this sms to change it's status to REC READ)
-                }
-            }
-            //this is a trash message, remove it
-            else
-            {
-                sim_dele_sms(i,rx_buf);
-            }
-        }
-    }
-}
-#endif
 /* USER CODE END 4 */
 
 /**

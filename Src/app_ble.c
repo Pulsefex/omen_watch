@@ -240,7 +240,7 @@ uint8_t index_con_int, mutex;
  * Advertising Data
  */
 #if (P2P_SERVER1 != 0)
-static const char local_name[] = { AD_TYPE_COMPLETE_LOCAL_NAME ,'W','S','M','A','R','T'};
+static const char local_name[] = { AD_TYPE_COMPLETE_LOCAL_NAME ,'P','U','L','S','E', 'F', 'E', 'X'};
 uint8_t manuf_data[14] = {
     sizeof(manuf_data)-1, AD_TYPE_MANUFACTURER_SPECIFIC_DATA, 
     0x01/*SKD version */,
@@ -890,7 +890,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
       if (New_Status == APP_BLE_FAST_ADV)
       {
     	LCD_BLE_PrintLogo();
-    	LCD_BLE_PrintLocalName("WSMART");
+    	LCD_BLE_PrintLocalName("LPulsefex");
     	LCD_BLE_PrintStatus("ADVERTISING");
         APP_DBG_MSG("Successfully Start Fast Advertising " );
         /* Start Timer to STOP ADV - TIMEOUT */
