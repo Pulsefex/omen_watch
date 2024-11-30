@@ -1,68 +1,75 @@
-#ifndef __Sim800L_h
-#define __Sim800L_h
-
-#include "stm32wbxx.h"
-
-/* uC-SIM buffer */
-#define MIN_BUFFER 255
-#define MAX_SMS 35
-#include <stdbool.h>
-
-// /* SIM command index */
-// #define IDX_CMD_TEXT_MODE       1
-// #define IDX_CMD_READ_SMS        2
-// #define IDX_CMD_DELE_SMS        3
-// #define IDX_CMD_SEND_SMS        4
-// #define IDX_CMD_CNMI_MODE       5
-// #define IDX_CMD_RES_OK          6
-// #define IDX_CMD_RES_ERR         7
-// #define IDX_CMD_SIG_STR         8                   //signal strength
-// #define IDX_CMD_REJ_IN_CALL     9                   //reject incomming call
-// #define IDX_SW_FLW_CTRL         10
-// #define IDX_CMD_MAX             10                   // maximum of supported command
-
-/* length of command string*/
-#define LEN_PHONE_NUM           12
-#define LEN_CMD_TEXT_MODE       9                   //length of text mode command
-#define LEN_CMD_READ_SMS        12                  //length of read sms command
-#define LEN_CMD_DELE_SMS        10                  //length of delete sms command
-#define LEN_CMD_SEND_SMS        10                  //length of send sms command
-#define LEN_CMD_CNMI_MODE       17                  //length of CNMI command
-#define LEN_CMD_RES_OK          6                   //length of respond from module SIM
-#define LEN_CMD_RES_ERR         9                   //length of respond from module SIM
-#define LEN_PUBLISH_MES         79
-#define LEN_CMD_SIG_STR         6                   //length of check signal strength command
-#define LEN_CMD_SW_FLW_CTRL     10
-#define LEN_CMD_REJ_IN_CALL     12                  //reject incomming call
-
-/* sms state */
-#define SMS_READ 0
-#define SMS_UNREAD 1
-
-/* module sim return code */
-#define SIM_RES_ERROR         0x1
-#define SIM_RES_OK            0x2
-#define SIM_NO_RES            0x4
-#define NO_SMS                0x8
-#define IDX_OOR               0x10
-#define LEN_OOR               0x20
-
-
-/* supportted function */
-bool sim800l_initialize(void);
-uint8_t sim_read_sms(uint8_t, uint8_t, char*);
-uint8_t sim_dele_sms(uint8_t, char*);
-uint8_t sim_send_sms(char*, char*, char*);
-uint8_t sim_set_text_mode(uint8_t,char*);
-uint8_t sim_set_cnmi_mode(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, char*);
-uint8_t sim_signal_strength(char*);
-uint8_t sim_check_res(char*);
-uint8_t sim_get_sms_contact(char*, char*);
-uint8_t sim_get_sms_data(char*, char*);
-uint8_t sim_get_sms_state(char*);
-uint8_t sim_rej_in_call(uint8_t,char*);
-
-void push_cmd(char*, uint8_t);
-int find_c(char*, uint8_t, uint8_t, char);    //return index of char in buffer
-
-#endif
+//#include <main.h>
+//
+//// === CONFIG ===
+//#define UART_SIM800 &huart1
+//#define FREERTOS    0
+//#define CMD_DELAY   2000
+//// ==============
+//
+//typedef struct {
+//    char *apn;
+//    char *apn_user;
+//    char *apn_pass;
+//} sim_t;
+//
+//typedef struct {
+//    char *host;
+//    uint16_t port;
+//    uint8_t connect;
+//} mqttServer_t;
+//
+//typedef struct {
+//    char *username;
+//    char *pass;
+//    char *clientID;
+//    unsigned short keepAliveInterval;
+//} mqttClient_t;
+//
+//typedef struct {
+//    uint8_t newEvent;
+//    unsigned char dup;
+//    int qos;
+//    unsigned char retained;
+//    unsigned short msgId;
+//    unsigned char payload[64];
+//    int payloadLen;
+//    unsigned char topic[64];
+//    int topicLen;
+//} mqttReceive_t;
+//
+//typedef struct {
+//    sim_t sim;
+//    mqttServer_t mqttServer;
+//    mqttClient_t mqttClient;
+//    mqttReceive_t mqttReceive;
+//} SIM800_t;
+//
+//void Sim800_RxCallBack(void);
+//
+//void clearRxBuffer(void);
+//
+//void clearMqttBuffer(void);
+//
+//int SIM800_SendCommand(char *command, char *reply, uint16_t delay);
+//
+//int MQTT_Init(void);
+//
+//void MQTT_Connect(void);
+//
+//void MQTT_Pub(char *topic, char *payload);
+//
+//void MQTT_PubUint8(char *topic, uint8_t data);
+//
+//void MQTT_PubUint16(char *topic, uint16_t data);
+//
+//void MQTT_PubUint32(char *topic, uint32_t data);
+//
+//void MQTT_PubFloat(char *topic, float payload);
+//
+//void MQTT_PubDouble(char *topic, double data);
+//
+//void MQTT_PingReq(void);
+//
+//void MQTT_Sub(char *topic);
+//
+//void MQTT_Receive(unsigned char *buf);

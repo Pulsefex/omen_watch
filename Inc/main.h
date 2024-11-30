@@ -62,13 +62,8 @@ extern "C" {
 #define __ADC_CALC_DATA_VOLTAGE(__VREFANALOG_VOLTAGE__, __ADC_DATA__)       \
   ((__ADC_DATA__) * (__VREFANALOG_VOLTAGE__) / DIGITAL_SCALE_12BITS)
 
-#if defined SMS
-#include "sim800l.h"
-#endif
 
-#define MAX_CLIENT      10
-#define LEN_TOPIC       12
-#define SIM_BUFFER MIN_BUFFER
+
 
 #define MAX_PUBLISH_MES 3
 #define PUBLISH_WATER_UNSAFE 0
@@ -84,15 +79,7 @@ extern "C" {
 #define VREF (float)3.3                            // analog reference voltage(Volt) of the ADC
 #define SCOUNT  10                          // sum of sample point
 
-#if defined SMS
-/* manage contact */
-struct PHONEBOOK {
-  char number[LEN_PHONE_NUM];       //contact number including send sms command
-  uint32_t stat;                    //SUBSCONFIRMEDF,UNSAFEF,UNDIGF
-};
-void update_phonebook(void);
-void inform_customer(uint16_t);
-#endif
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
