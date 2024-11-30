@@ -52,7 +52,6 @@
 #include "kalman.h"
 #include "max30102.h"
 #include "max30003.h"
-#include "sim800l.h"
 #include "tmp102.h"
 #include "oled.h"
 #include <stdio.h>
