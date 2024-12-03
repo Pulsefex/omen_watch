@@ -438,45 +438,11 @@ void setActiveSensor(uint8_t data) {
 	HAL_Delay(250);
 	systemInit();
 	ssd1306_Init();
-	  ssd1306_DrawBitmap(0,0,logo,128,64,1);
-	  ssd1306_UpdateScreen();
-	  HAL_Delay(2000); // Display pulsefex logo for 2 seconds
-	  ssd1306_Init();
+	ssd1306_DrawBitmap(0,0,logo,128,64,1);
+	ssd1306_UpdateScreen();
+	HAL_Delay(2000); // Display pulsefex logo for 2 seconds
+	ssd1306_Init();
 	setActiveSensor(1 << MAX30102_BIT_POSITION);
-    //if (sim800l_initialize()) vPrintSIM800l("SIM800L initialized successfully.\r\n");
-    //else { vPrintSIM800l("SIM800L initialization failed.\r\n");while (1);}
-//	Uart_Init(USART1, 9600);
-//	static bool sim900_initialized = false;
-//
-//	Initialize_SIM900();
-//	if (sim900_initialized) {
-//	    vPrintSIM800l("SIM800L initialized successfully.\r\n");
-//	} else {
-//	    vPrintSIM800l("SIM800L initialization failed.\r\n");
-//	}
-//
-//	    do
-//	       {
-//	       SIM900_print("ATD14168259909;\r\n");
-//	       }while (SIM900_waitResponse() != SIM900_OK); //wait until ... "OK"
-
-    // MQTT settings
-//    SIM800.sim.apn = "internet";
-//    SIM800.sim.apn_user = "";
-//    SIM800.sim.apn_pass = "";
-//    SIM800.mqttServer.host = "mqtt.mqtt.ru";
-//    SIM800.mqttServer.port = 1883;
-//    SIM800.mqttClient.username = "user";
-//    SIM800.mqttClient.pass = "pass";
-//    SIM800.mqttClient.clientID = "TestSub";
-//    SIM800.mqttClient.keepAliveInterval = 120;
-//
-//    MQTT_Init();
-//
-//       uint8_t sub = 0;
-//
-//       // Phone number for publishing
-//       char phone_number[] = "+11234567890";
 
 	/* USER CODE END 2 */
 	APPE_Init();
@@ -487,49 +453,18 @@ void setActiveSensor(uint8_t data) {
 		/* USER CODE BEGIN 3 */
 		SCH_Run(~0);
 		vReadSensorData();
-		//vShowOledScreenProcess(OLED_STATUS_MAX30102);
+		vShowOledScreenProcess(OLED_STATUS_MAX30102);
 		//float temp=0.0;
 		//int result;
-//		result = TMP102_ReadTemperature(&temp);
+		//result = TMP102_ReadTemperature(&temp);
         //fetch heart rate and SpO2
-       // unsigned char heartRate=ucGetMax30102HR();
-       //unsigned char spo2= ucGetMax30102SPO2();
-       // vPrintTMP102Data(temp, result);
+		//unsigned char heartRate=ucGetMax30102HR();
+		//unsigned char spo2= ucGetMax30102SPO2();
+		//vPrintTMP102Data(temp, result);
         //print to my serial
         //i run the command screen /dev/ttyACM0 115200 on Ubuntu Linux
-//        vPrintSensorData((uint32_t)heartRate);
-//        vPrintSensorData((uint32_t)spo2);
-
-//        if (SIM800.mqttServer.connect == 0) {
-//                MQTT_Init();
-//                sub = 0;
-//            }
-//            if (SIM800.mqttServer.connect == 1) {
-//                if (sub == 0) {
-//                    MQTT_Sub("phone/numbers");  // Subscribe to the phone number topic
-//                    MQTT_Sub("test");          // Subscribe to the test topic
-//                    sub = 1;
-//                }
-//
-//                // Publish test data
-//                MQTT_Pub("phone/numbers", phone_number);  // Publish the phone number
-//                MQTT_Pub("STM32/string", "string");
-//
-//                // Handle incoming messages
-//                if (SIM800.mqttReceive.newEvent) {
-//                    char *topic = SIM800.mqttReceive.topic;
-//                    char *payload = SIM800.mqttReceive.payload;
-//
-//                    if (strcmp(topic, "phone/numbers") == 0) {
-//                        // Process the received phone number
-//                        printf("Received phone number: %s\n", payload);
-//                    }
-//
-//                    SIM800.mqttReceive.newEvent = 0;
-//                }
-//            }
-//            HAL_Delay(1000);
-//	}
+		//vPrintSensorData((uint32_t)heartRate);
+		//vPrintSensorData((uint32_t)spo2);
 	}
 	/* USER CODE END 3 */
 }
