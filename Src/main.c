@@ -65,6 +65,10 @@
 
 
 uint16_t RxCounter;
+#define MAX_BPM_THRESHOLD 130
+#define MIN_BPM_THRESHOLD 60
+uint8_t ucHighBPMDetected = 0;
+uint8_t ucLowBPMDetected = 0;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -107,10 +111,6 @@ static void MX_TIM16_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM17_Init(void);
 /* USER CODE BEGIN PFP */
-//uint32_t uiGSRRawData=0;
-//volatile static unsigned int uiAd8232AnalogConvertedValue = 0;
-//volatile static unsigned char ucAd8232AnalogConvertedValue = 0;
-//volatile static unsigned short usAd8232AnalogConvertedValue = 0;
 
 volatile uint32_t uiTimer16Counter = 0;
 volatile uint8_t ucSensorReadFlag = 0;
@@ -118,15 +118,7 @@ volatile uint8_t ecgFIFOIntFlag = 0;
 uint8_t ucOledStatusFlag = 7;
 uint8_t ucPrintCounter=0;
 uint8_t ucIsMax30102Active = 1;
-uint8_t ucIsMax30003Active = 1;
-uint8_t ucIsSi7021Active = 1;
-uint8_t ucIsSRActive = 1;
 
-//unsigned int ADC_TIMEOUT = 300;
-//unsigned char ucIsResponseFinished = 1;
-//unsigned int uiAd8232MaxValue = 4000;
-
-#define fCons  0xff/uiAd8232MaxValue
 
 typedef union {
 	float f;
@@ -136,6 +128,7 @@ typedef union {
 } DataConverterTypeDef;
 DataConverterTypeDef dataConverter;
 typedefBleData bleData;
+void checkBPMAndControlLED(uint8_t bpm);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -143,44 +136,7 @@ typedefBleData bleData;
 /* Peripherals handlers declaration */
 /* ADC handler declaration */
 ADC_HandleTypeDef AdcHandle;
-/* Variables for ADC conversion data */
-uint16_t uhADCxConvertedData = VAR_CONVERTED_DATA_INIT_VALUE; /* ADC group regular conversion data */
 
-/* Variables for ADC conversion data computation to physical values */
-volatile uint16_t usADCxConvertedData_Voltage_mVolt = 0; /* Value of voltage calculated from ADC conversion data (unit: mV) */
-
-/* Variable to report status of ADC group regular uniter conversion          */
-/*  0: ADC group regular unitary conversion is not completed                  */
-/*  1: ADC group regular unitary conversion is completed                      */
-/*  2: ADC group regular unitary conversion has not been started yet          */
-/*     (initial state)                                                        */
-
-//int groveGsrCounter = 0 ;
-//long groveVal;
-//void prsCheckAI() {
-//	/* Init variable containing ADC conversion data */
-//	uhADCxConvertedData = VAR_CONVERTED_DATA_INIT_VALUE;
-//	if (!ucIsResponseFinished)
-//		return;
-//	ucIsResponseFinished = 0;
-//
-//	HAL_ADC_Start_IT(&hadc1);
-//	/*
-//	if (HAL_ADC_Start_IT(&AdcHandle) != HAL_OK) {
-//	}
-//	*/
-//}
-
-//void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-//	uhADCxConvertedData = HAL_ADC_GetValue(hadc);
-//	/* Computation of ADC conversions raw data to physical values           */
-//	/* using helper macro.                                                  */
-//	usADCxConvertedData_Voltage_mVolt = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
-//			uhADCxConvertedData);
-//	vSetGSRAnalogValue(uhADCxConvertedData);
-//	//HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
-//	ucIsResponseFinished = 1;
-//}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM16) {
@@ -206,14 +162,9 @@ void initTimer() {
 	HAL_TIM_Base_Init(&htim16);
 }
 
-//void initAdc() {
-//	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK) {
-//	}
-//}
 
 void initInterrupts() {
 	HAL_TIM_Base_Start_IT(&htim16);
-	//HAL_ADC_Start_IT(&hadc1);
 }
 
 void systemInit(void) {
@@ -222,61 +173,18 @@ void systemInit(void) {
 	initInterrupts();
 	vMax30102Init();
 	vOledInit();
-	//vInitsi7021();
-  	//vMax30003Init();
-	//vMax30102Shutdown();
-	//HAL_Delay(15);
-	//tTsl2561Init();
 	vInitKalman(KALMAN_FILTER_ACTIVATION_LEVEL,0,KALMAN_FILTER_DEFAULT_MIN_CRETERIA);
 
 }
 
-//void vSetGSRAnalogValue(uint32_t value){
-//	uiGSRRawData=value;
-//}
-//
-//uint32_t uiGetGSRHumanResistance(void){
-//	return uiGSRRawData;//((1024+2*uiGSRRawData)*10000)/(512-uiGSRRawData);
-//}
-//
-//unsigned char ucGetAd8232AnalogValue() {
-//	return ucAd8232AnalogConvertedValue;
-//}
-//
-//unsigned int uiGetAd8232AnalogValue() {
-//	return uiAd8232AnalogConvertedValue;
-//}
-//
-//unsigned short usGetAd8232AnalogValue() {
-//	return usAd8232AnalogConvertedValue;
-//}
-//
-//void vSetAdcChannel(uint32_t adcChannel){
-//	ADC_ChannelConfTypeDef sConfig = { 0 };
-//
-//	sConfig.Channel = adcChannel;
-//	sConfig.Rank = ADC_REGULAR_RANK_1;
-//	sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
-//	sConfig.SingleDiff = ADC_SINGLE_ENDED;
-//	sConfig.OffsetNumber = ADC_OFFSET_NONE;
-//	sConfig.Offset = 0;
-//	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
-//		//Error_Handler();
-//	}
-//}
 
 
 
 void vReadSensorData(void){
 	if(ucSensorReadFlag == 1){
-		//if(ucIsSi7021Active)
-			//vSi7021ProcessHumidityAndTemperature();
-		//if(ucIsMax30003Active)
-			//vMax30003ReadData();
 		if(ucIsMax30102Active)
 			vMax30102ReadData();
 		ucSensorReadFlag=0;
-		//HAL_ADC_Start_DMA(&hadc1,&uiGSRRawData,1);
 		vShowOledScreenProcess(ucOledStatusFlag);
 	}
 
@@ -320,30 +228,10 @@ void vShowOledScreenProcess(uint8_t status) {
 	}else if (status == OLED_STATUS_SHUT_DOWN){
 		ucPrintCounter = 0;
 		vOledBleClearScreen();
-//	}
-//	else if (status == OLED_STATUS_GSR) {
-//		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT_GSR) {
-//			vOledBlePrintGSR((float) uiGetGSRHumanResistance());
-//			ucPrintCounter = 0;
-//		}
-	} else if (status == OLED_STATUS_MAX30003) {
-		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT_MAX30003) {
-			int j = 0;
-			for (j = 0; j < mMax3003Sensor.usEcgCounter; j++) {
-				vOledBlePrintMax30003(mMax3003Sensor.usaEcgVal[j],
-						mMax3003Sensor.faBpm[0], mMax3003Sensor.uiaRorVal[0]);
-			}
-			ucPrintCounter = 0;
-		}
 	} else if (status == OLED_STATUS_MAX30102) {
 		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT_MAX30102) {
 			vOledBlePrintMax30102(ucGetMax30102HR(), ucGetMax30102SPO2(),
 					usGetMax30102Diff());
-			ucPrintCounter = 0;
-		}
-	} else if (status == OLED_STATUS_SI7021) {
-		if (ucPrintCounter >= OLED_COUNTER_TIME_OUT) {
-			vOledBlePrintSi7021(mSi7021Sensor.fTemperature, mSi7021Sensor.fHumidty);
 			ucPrintCounter = 0;
 		}
 	} else if (status == OLED_STATUS_BLE) {
@@ -357,14 +245,6 @@ void vShowOledScreenProcess(uint8_t status) {
 }
 
 void setActiveSensor(uint8_t data) {
-	if ((data >> MAX30003_BIT_POSITION) & 1U) {
-		ucIsMax30003Active = 1;
-		vMax30003Init();
-	} else {
-		ucIsMax30003Active = 0;
-		vMax30003SoftwareReset();
-	}
-
 	if ((data >> MAX30102_BIT_POSITION) & 1U) {
 		ucIsMax30102Active = 1;
 		vMax30102StartUp();
@@ -374,20 +254,6 @@ void setActiveSensor(uint8_t data) {
 		ucIsMax30102Active = 0;
 		vMax30102Shutdown();
 	}
-
-	if ((data >> SI7021_BIT_POSITION) & 1U) {
-		ucIsSi7021Active = 1;
-		vInitsi7021();
-	} else {
-		ucIsSi7021Active = 0;
-	}
-
-	if ((data >> SR_BIT_POSITION) & 1U) {
-		ucIsSRActive = 1;
-	} else {
-		ucIsSRActive = 0;
-	}
-
 }
 
 
@@ -399,7 +265,8 @@ void setActiveSensor(uint8_t data) {
  */
  int main(void) {
 	/* USER CODE BEGIN 1 */
-	 uint8_t i;
+	 uint8_t heartRate=0;
+
 	 booting();
 	/* USER CODE END 1 */
 
@@ -426,8 +293,6 @@ void setActiveSensor(uint8_t data) {
 	MX_USART1_UART_Init();
 	MX_RTC_Init();
 	MX_RF_Init();
-	MX_ADC1_Init();
-	MX_SPI1_Init();
 	MX_TIM16_Init();
 	MX_TIM1_Init();
 	MX_TIM17_Init();
@@ -453,6 +318,10 @@ void setActiveSensor(uint8_t data) {
 		/* USER CODE BEGIN 3 */
 		SCH_Run(~0);
 		vReadSensorData();
+	       if (ucIsMax30102Active) {
+	            heartRate = ucGetMax30102HR();
+	            checkBPMAndControlLED(heartRate);
+	        }
 		vShowOledScreenProcess(OLED_STATUS_MAX30102);
 		//float temp=0.0;
 		//int result;
@@ -1059,6 +928,19 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
+void checkBPMAndControlLED(uint8_t bpm) {
+    if (bpm>MAX_BPM_THRESHOLD||bpm<MIN_BPM_THRESHOLD) {
+        //If BPM is too high, turn on the LED
+        HAL_GPIO_WritePin(LED_BLUE_GPIO_Port,LED_BLUE_Pin,GPIO_PIN_SET);
+        ucHighBPMDetected=1;
+        ucLowBPMDetected=1;
+    }else{
+        //If BPM is normal, turn off the LED
+        HAL_GPIO_WritePin(LED_BLUE_GPIO_Port,LED_BLUE_Pin,GPIO_PIN_RESET);
+        ucHighBPMDetected=0;
+        ucLowBPMDetected=0;
+    }
+}
 /* USER CODE END 4 */
 
 /**
